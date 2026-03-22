@@ -80,7 +80,15 @@ body::before {
 .auth-err { font-size: 12px; font-weight: 700; color: var(--red); margin-top: 10px; text-align: center; min-height: 18px; }
 
 /* ── SCREEN STACK ── */
-.screen-wrap { position: fixed; inset: 0; max-width: 430px; margin: 0 auto; overflow: hidden; }
+.screen-wrap {
+  position: fixed;
+  top: 0; bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  overflow: hidden;
+}
 .screen {
   position: absolute; inset: 0;
   overflow-y: auto; overflow-x: hidden;
@@ -716,11 +724,12 @@ function _applyNav(from, to, isBack) {
 function renderHome() {
   document.getElementById('today-label').textContent =
     new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  // Alacak = tüm pozitif kayıtların toplamı (kişi bazlı netleştirme YOK)
+  const totalAlacak = records.filter(r=>r.amount>0).reduce((s,r)=>s+r.amount,0);
+  const totalBorc   = records.filter(r=>r.amount<0).reduce((s,r)=>s+Math.abs(r.amount),0);
+  document.getElementById('total-alacak').textContent = fmt(totalAlacak);
+  document.getElementById('total-borc').textContent   = fmt(totalBorc);
   const p = getPeople();
-  let a=0,b=0;
-  for (const v of Object.values(p)) { if(v>0) a+=v; else b+=Math.abs(v); }
-  document.getElementById('total-alacak').textContent = fmt(a);
-  document.getElementById('total-borc').textContent   = fmt(b);
   document.getElementById('name-sugg').innerHTML = Object.keys(p).map(n=>`<option value="${n}">`).join('');
   document.getElementById('year-display').textContent = calYear;
   renderMonthCards();
