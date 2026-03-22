@@ -595,7 +595,12 @@ const MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağu
 const DAYS   = ['Pt','Sa','Ça','Pe','Cu','Ct','Pz'];
 
 const fmt    = n => Math.abs(n).toLocaleString('tr-TR') + '₺';
-const todayS = () => new Date().toISOString().slice(0,10);
+const todayS = () => {
+  const now = new Date();
+  // Türkiye saati UTC+3
+  const tr = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+  return tr.toISOString().slice(0,10);
+};
 const trDate = d => new Date(d+'T00:00:00').toLocaleDateString('tr-TR',{day:'numeric',month:'long'});
 
 function toast(msg) {
@@ -746,8 +751,10 @@ function _applyNav(from, to, isBack) {
 
 // ─── HOME ─────────────────────────────────────────────────────
 function renderHome() {
+  const now = new Date();
+  const trNow = new Date(now.getTime() + 3 * 60 * 60 * 1000);
   document.getElementById('today-label').textContent =
-    new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    trNow.toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   // Alacak = tüm pozitif kayıtların toplamı (kişi bazlı netleştirme YOK)
   const totalAlacak = records.filter(r=>r.amount>0).reduce((s,r)=>s+r.amount,0);
   const totalBorc   = records.filter(r=>r.amount<0).reduce((s,r)=>s+Math.abs(r.amount),0);
