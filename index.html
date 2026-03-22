@@ -33,8 +33,6 @@ body {
   margin: 0 auto;
   position: relative;
 }
-
-/* paper lines texture */
 body::before {
   content: '';
   position: fixed; inset: 0;
@@ -42,13 +40,47 @@ body::before {
   pointer-events: none; z-index: 0;
 }
 
-/* ── SCREEN STACK ── */
-.screen-wrap {
-  position: fixed; inset: 0; max-width: 430px; margin: 0 auto;
-  overflow: hidden;
+/* ── AUTH SCREEN ── */
+.auth-screen {
+  position: fixed; inset: 0; z-index: 600;
+  background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 32px 28px;
 }
+.auth-screen::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(0,0,0,0.033) 27px, rgba(0,0,0,0.033) 28px);
+  pointer-events: none;
+}
+.auth-logo { font-size: 52px; margin-bottom: 12px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.13)); position: relative; z-index: 1; }
+.auth-title { font-family: 'Playfair Display', serif; font-size: 24px; text-align: center; margin-bottom: 4px; position: relative; z-index: 1; }
+.auth-sub { font-size: 12px; color: var(--muted); font-weight: 700; margin-bottom: 32px; position: relative; z-index: 1; }
 
-/* each screen slides in/out */
+.auth-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  width: 100%;
+  box-shadow: var(--shadow);
+  position: relative; z-index: 1;
+}
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 24px; background: var(--bg); border-radius: var(--radius-sm); padding: 4px; }
+.auth-tab { padding: 10px; border: none; border-radius: 10px; font-size: 13px; font-weight: 800; font-family: 'Nunito', sans-serif; cursor: pointer; background: transparent; color: var(--muted); transition: all 0.18s; }
+.auth-tab.active { background: var(--card); color: var(--text); box-shadow: var(--shadow); }
+
+.auth-field { margin-bottom: 14px; }
+.auth-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); display: block; margin-bottom: 6px; }
+.auth-input { width: 100%; background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-sm); padding: 13px 15px; font-size: 15px; font-family: 'Nunito', sans-serif; font-weight: 700; color: var(--text); outline: none; transition: border-color 0.2s; }
+.auth-input:focus { border-color: var(--text); }
+.auth-input::placeholder { color: #c8c0b0; font-weight: 600; }
+
+.auth-btn { width: 100%; padding: 15px; background: var(--text); color: white; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 800; font-family: 'Nunito', sans-serif; cursor: pointer; margin-top: 6px; transition: opacity 0.18s; }
+.auth-btn:active { opacity: 0.8; }
+.auth-err { font-size: 12px; font-weight: 700; color: var(--red); margin-top: 10px; text-align: center; min-height: 18px; }
+
+/* ── SCREEN STACK ── */
+.screen-wrap { position: fixed; inset: 0; max-width: 430px; margin: 0 auto; overflow: hidden; }
 .screen {
   position: absolute; inset: 0;
   overflow-y: auto; overflow-x: hidden;
@@ -59,22 +91,11 @@ body::before {
   transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
   will-change: transform;
 }
-.screen.active {
-  transform: translateX(0);
-  z-index: 2;
-}
-.screen.behind {
-  transform: translateX(-28px);
-  z-index: 1;
-}
-.screen#screen-home {
-  transform: translateX(0);
-  z-index: 1;
-}
+.screen.active { transform: translateX(0); z-index: 2; }
+.screen.behind { transform: translateX(-28px); z-index: 1; }
+.screen#screen-home { transform: translateX(0); z-index: 1; }
 .screen#screen-home.active { z-index: 2; }
 .screen#screen-home.behind { transform: translateX(-28px); }
-
-/* paper texture on each screen */
 .screen::before {
   content: '';
   position: fixed; inset: 0;
@@ -83,54 +104,29 @@ body::before {
 }
 
 /* ── TOP BAR ── */
-.top-bar {
-  position: sticky; top: 0; z-index: 10;
-  padding: 52px 20px 14px;
-  display: flex; align-items: center; gap: 12px;
-  background: var(--bg);
-}
-.top-bar::after {
-  content: '';
-  position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
-  background: var(--border);
-}
-.back-btn {
-  background: var(--card); border: none;
-  width: 36px; height: 36px; border-radius: 50%;
-  font-size: 17px; cursor: pointer; flex-shrink: 0;
-  box-shadow: var(--shadow);
-  display: flex; align-items: center; justify-content: center;
-  transition: transform 0.13s;
-}
+.top-bar { position: sticky; top: 0; z-index: 10; padding: 52px 20px 14px; display: flex; align-items: center; gap: 12px; background: var(--bg); }
+.top-bar::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: var(--border); }
+.back-btn { background: var(--card); border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 17px; cursor: pointer; flex-shrink: 0; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; transition: transform 0.13s; }
 .back-btn:active { transform: scale(0.88); }
-.top-bar-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 20px; flex: 1;
-}
+.top-bar-title { font-family: 'Playfair Display', serif; font-size: 20px; flex: 1; }
 .top-bar-sub { font-size: 11px; color: var(--muted); font-weight: 700; line-height: 1; margin-top: 2px; }
 
-/* home header (no sticky bar) */
+/* ── HOME HEADER ── */
 .home-header { padding: 52px 20px 16px; display: flex; align-items: center; gap: 13px; min-width: 0; overflow: hidden; }
 .home-header-icon { font-size: 33px; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.13)); flex-shrink: 0; }
 .home-header-text { min-width: 0; flex: 1; }
 .home-header h1 { font-family: 'Playfair Display', serif; font-size: 21px; line-height: 1.2; }
 .home-header .sub { font-size: 11px; color: var(--muted); font-weight: 700; margin-top: 3px; }
+.logout-btn { background: var(--card); border: 2px solid var(--border); border-radius: 50px; padding: 7px 14px; font-size: 11px; font-weight: 800; font-family: 'Nunito', sans-serif; cursor: pointer; color: var(--muted); flex-shrink: 0; transition: all 0.15s; white-space: nowrap; }
+.logout-btn:active { background: var(--border); }
 
 /* ── SECTION TITLE ── */
-.section-title {
-  padding: 14px 20px 10px;
-  font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
-  display: flex; align-items: center; gap: 8px; position: relative; z-index: 1;
-}
+.section-title { padding: 14px 20px 10px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); display: flex; align-items: center; gap: 8px; position: relative; z-index: 1; }
 .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
 /* ── SUMMARY CARDS ── */
 .summary-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px 6px; position: relative; z-index: 1; overflow: hidden; }
-.summary-card {
-  border-radius: var(--radius); padding: 20px 16px 18px;
-  cursor: pointer; transition: transform 0.17s;
-  position: relative; overflow: hidden; min-width: 0;
-}
+.summary-card { border-radius: var(--radius); padding: 20px 16px 18px; cursor: pointer; transition: transform 0.17s; position: relative; overflow: hidden; min-width: 0; }
 .summary-card:active { transform: scale(0.96); }
 .summary-card.green { background: linear-gradient(140deg,#2d7a4f 0%,#3da862 100%); box-shadow: 0 6px 22px rgba(45,122,79,0.3); }
 .summary-card.red   { background: linear-gradient(140deg,#c0392b 0%,#d9534f 100%); box-shadow: 0 6px 22px rgba(192,57,43,0.26); }
@@ -148,14 +144,9 @@ body::before {
 .year-btn:active { transform:scale(0.88); }
 .year-display { font-family:'Playfair Display',serif; font-size:21px; min-width:68px; text-align:center; }
 
-/* ── MONTH GRID (4 cols × 3 rows, no scroll) ── */
+/* ── MONTH GRID ── */
 .month-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:9px; padding:4px 16px 16px; position:relative; z-index:1; }
-
-.month-card {
-  background:var(--card); border-radius:var(--radius-sm); padding:14px 6px 12px;
-  cursor:pointer; box-shadow:var(--shadow);
-  border:2px solid transparent; transition:all 0.17s; text-align:center;
-}
+.month-card { background:var(--card); border-radius:var(--radius-sm); padding:14px 6px 12px; cursor:pointer; box-shadow:var(--shadow); border:2px solid transparent; transition:all 0.17s; text-align:center; }
 .month-card:active { transform:scale(0.94); }
 .mc-num { font-size:10px; color:var(--muted); font-weight:700; margin-bottom:3px; }
 .mc-name { font-size:13px; font-weight:800; color:var(--text); }
@@ -171,7 +162,6 @@ body::before {
 .cms-val { font-size:19px; font-weight:900; margin-top:2px; }
 .cms-card.green .cms-val { color:var(--green); }
 .cms-card.red   .cms-val { color:var(--red); }
-
 .cal-wrap { padding:14px 16px 4px; position:relative;z-index:1; }
 .cal-grid { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
 .cal-head { display:grid; grid-template-columns:repeat(7,1fr); background:var(--text); }
@@ -187,8 +177,6 @@ body::before {
 .empty .cdn { color:transparent; }
 .cdd { display:flex; gap:2px; flex-wrap:wrap; justify-content:center; }
 .cdd span { font-size:7px; line-height:1; }
-
-/* day records below calendar */
 .day-recs-section { padding:14px 16px 0; position:relative;z-index:1; }
 .day-recs-title-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
 .day-recs-date { font-family:'Playfair Display',serif; font-size:16px; }
@@ -205,7 +193,7 @@ body::before {
 .dr-amt.p { color:var(--green); }
 .dr-amt.n { color:var(--red); }
 
-/* ── FILTER SCREEN (alacak/borç kişi listesi) ── */
+/* ── FILTER SCREEN ── */
 .filter-badge { margin:14px 16px 0; border-radius:var(--radius-sm); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; position:relative;z-index:1; }
 .filter-badge.g { background:var(--green-light); }
 .filter-badge.r { background:var(--red-light); }
@@ -215,7 +203,6 @@ body::before {
 .fb-amt { font-size:24px; font-weight:900; }
 .filter-badge.g .fb-amt { color:var(--green); }
 .filter-badge.r .fb-amt { color:var(--red); }
-
 .filter-plist { padding:10px 16px; display:flex; flex-direction:column; gap:8px; position:relative;z-index:1; }
 .fp-item { background:var(--card); border-radius:var(--radius-sm); padding:14px 14px; display:flex; align-items:center; gap:11px; cursor:pointer; box-shadow:var(--shadow); border-left:4px solid transparent; transition:transform 0.14s; }
 .fp-item:active { transform:scale(0.98); }
@@ -264,15 +251,34 @@ body::before {
 .empty-st .ei { font-size:40px; display:block; margin-bottom:9px; }
 
 /* ── FAB ── */
-.fab {
-  position: fixed; bottom:26px; left:50%; transform:translateX(-50%);
-  background:var(--text); color:white; border:none; border-radius:50px;
-  padding:16px 32px; font-size:15px; font-weight:800; font-family:'Nunito',sans-serif;
-  cursor:pointer; box-shadow:0 8px 26px rgba(0,0,0,0.22); z-index:50;
-  display:flex; align-items:center; gap:9px; transition:transform 0.14s; white-space:nowrap;
-}
+.fab { position:fixed; bottom:26px; left:50%; transform:translateX(-50%); background:var(--text); color:white; border:none; border-radius:50px; padding:16px 32px; font-size:15px; font-weight:800; font-family:'Nunito',sans-serif; cursor:pointer; box-shadow:0 8px 26px rgba(0,0,0,0.22); z-index:50; display:flex; align-items:center; gap:9px; transition:transform 0.14s; white-space:nowrap; }
 .fab:active { transform:translateX(-50%) scale(0.95); }
 .fab.hidden { display:none; }
+
+/* ── RECORD DETAIL POPUP ── */
+.rec-popup-overlay { position:fixed; inset:0; background:rgba(20,15,10,0.52); z-index:350; display:none; align-items:center; justify-content:center; backdrop-filter:blur(5px); padding:24px; }
+.rec-popup-overlay.open { display:flex; }
+.rec-popup { background:var(--card); border-radius:24px; width:100%; max-width:360px; box-shadow:0 20px 60px rgba(0,0,0,0.22); overflow:hidden; animation:popIn 0.25s cubic-bezier(0.34,1.56,0.64,1); position:relative; }
+@keyframes popIn { from{transform:scale(0.82);opacity:0} to{transform:scale(1);opacity:1} }
+.rec-popup-close { position:absolute; top:14px; right:14px; width:30px; height:30px; border-radius:50%; background:var(--red); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#fff; font-size:14px; font-weight:900; box-shadow:0 3px 10px rgba(192,57,43,0.35); transition:transform 0.13s; z-index:2; }
+.rec-popup-close:active { transform:scale(0.88); }
+.rec-popup-color-bar { height:6px; }
+.rec-popup-color-bar.p { background:linear-gradient(90deg,var(--green-mid),var(--green)); }
+.rec-popup-color-bar.n { background:linear-gradient(90deg,var(--red-mid),var(--red)); }
+.rec-popup-body { padding:24px 22px 20px; }
+.rec-popup-type-badge { display:inline-flex; align-items:center; gap:6px; border-radius:20px; padding:5px 12px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:18px; }
+.rec-popup-type-badge.p { background:var(--green-light); color:var(--green); }
+.rec-popup-type-badge.n { background:var(--red-light); color:var(--red); }
+.rec-popup-amount { font-size:38px; font-weight:900; line-height:1; margin-bottom:18px; }
+.rec-popup-amount.p { color:var(--green); }
+.rec-popup-amount.n { color:var(--red); }
+.rec-popup-rows { display:flex; flex-direction:column; gap:10px; margin-bottom:22px; }
+.rec-popup-row { display:flex; align-items:flex-start; gap:12px; }
+.rpr-icon { font-size:18px; flex-shrink:0; margin-top:1px; }
+.rpr-label { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); }
+.rpr-value { font-size:15px; font-weight:800; margin-top:1px; }
+.rec-popup-paid-btn { width:100%; padding:15px; background:#e8e4dc; color:#6b6358; border:none; border-radius:var(--radius-sm); font-size:14px; font-weight:800; font-family:'Nunito',sans-serif; cursor:pointer; transition:background 0.15s; display:flex; align-items:center; justify-content:center; gap:8px; }
+.rec-popup-paid-btn:active { background:#ddd8cf; }
 
 /* ── FORM MODAL ── */
 .modal-overlay { position:fixed; inset:0; background:rgba(20,15,10,0.5); z-index:300; display:none; align-items:flex-end; backdrop-filter:blur(3px); }
@@ -294,112 +300,75 @@ body::before {
 .sbtn { width:100%; padding:16px; background:var(--text); color:white; border:none; border-radius:var(--radius-sm); font-size:15px; font-weight:800; font-family:'Nunito',sans-serif; cursor:pointer; margin-top:5px; }
 .sbtn:active { opacity:0.8; }
 
-/* ── RECORD DETAIL POPUP ── */
-.rec-popup-overlay {
-  position: fixed; inset: 0;
-  background: rgba(20,15,10,0.52);
-  z-index: 350;
-  display: none; align-items: center; justify-content: center;
-  backdrop-filter: blur(5px);
-  padding: 24px;
-}
-.rec-popup-overlay.open { display: flex; }
-.rec-popup {
-  background: var(--card);
-  border-radius: 24px;
-  width: 100%; max-width: 360px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.22);
-  overflow: hidden;
-  animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
-  position: relative;
-}
-@keyframes popIn { from{transform:scale(0.82);opacity:0} to{transform:scale(1);opacity:1} }
-
-.rec-popup-close {
-  position: absolute; top: 14px; right: 14px;
-  width: 30px; height: 30px; border-radius: 50%;
-  background: var(--red); border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 14px; font-weight: 900;
-  box-shadow: 0 3px 10px rgba(192,57,43,0.35);
-  transition: transform 0.13s;
-  z-index: 2;
-}
-.rec-popup-close:active { transform: scale(0.88); }
-
-.rec-popup-color-bar { height: 6px; }
-.rec-popup-color-bar.p { background: linear-gradient(90deg, var(--green-mid), var(--green)); }
-.rec-popup-color-bar.n { background: linear-gradient(90deg, var(--red-mid), var(--red)); }
-
-.rec-popup-body { padding: 24px 22px 20px; }
-
-.rec-popup-type-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  border-radius: 20px; padding: 5px 12px;
-  font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px;
-  margin-bottom: 18px;
-}
-.rec-popup-type-badge.p { background: var(--green-light); color: var(--green); }
-.rec-popup-type-badge.n { background: var(--red-light);   color: var(--red); }
-
-.rec-popup-amount {
-  font-size: 38px; font-weight: 900; line-height: 1; margin-bottom: 18px;
-}
-.rec-popup-amount.p { color: var(--green); }
-.rec-popup-amount.n { color: var(--red); }
-
-.rec-popup-rows { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
-.rec-popup-row { display: flex; align-items: flex-start; gap: 12px; }
-.rpr-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-.rpr-info {}
-.rpr-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
-.rpr-value { font-size: 15px; font-weight: 800; margin-top: 1px; }
-
-.rec-popup-paid-btn {
-  width: 100%; padding: 15px;
-  background: #e8e4dc; color: #6b6358;
-  border: none; border-radius: var(--radius-sm);
-  font-size: 14px; font-weight: 800; font-family: 'Nunito', sans-serif;
-  cursor: pointer; transition: background 0.15s;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-}
-.rec-popup-paid-btn:active { background: #ddd8cf; }
-
 /* ── LOADING ── */
-.loading-overlay {
-  position: fixed; inset: 0; z-index: 500;
-  background: rgba(245,240,232,0.85);
-  display: none; align-items: center; justify-content: center;
-  backdrop-filter: blur(2px);
-}
-.loading-spinner {
-  width: 44px; height: 44px; border-radius: 50%;
-  border: 4px solid var(--border);
-  border-top-color: var(--text);
-  animation: spin 0.7s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+.loading-overlay { position:fixed; inset:0; z-index:500; background:rgba(245,240,232,0.85); display:none; align-items:center; justify-content:center; backdrop-filter:blur(2px); }
+.loading-spinner { width:44px; height:44px; border-radius:50%; border:4px solid var(--border); border-top-color:var(--text); animation:spin 0.7s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
 
 /* ── TOAST ── */
-.toast { position:fixed; bottom:106px; left:50%; transform:translateX(-50%); background:var(--text); color:white; padding:10px 20px; border-radius:50px; font-size:13px; font-weight:700; z-index:400; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-events:none; }
+.toast { position:fixed; bottom:106px; left:50%; transform:translateX(-50%); background:var(--text); color:white; padding:10px 20px; border-radius:50px; font-size:13px; font-weight:700; z-index:600; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-events:none; }
 .toast.show { opacity:1; }
 </style>
 </head>
 <body>
 
-<div class="screen-wrap">
+<!-- ══════════════ AUTH SCREEN ══════════════ -->
+<div class="auth-screen" id="auth-screen">
+  <div class="auth-logo">📒</div>
+  <div class="auth-title">Alacak & Verecek<br>Defteri</div>
+  <div class="auth-sub">Kişisel defterin, her cihazda</div>
 
-  <!-- ══════════════ SCREEN: HOME ══════════════ -->
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-giris" onclick="switchTab('giris')">Giriş Yap</button>
+      <button class="auth-tab" id="tab-kayit" onclick="switchTab('kayit')">Kayıt Ol</button>
+    </div>
+
+    <div id="form-giris">
+      <div class="auth-field">
+        <label class="auth-label">E-posta</label>
+        <input class="auth-input" id="login-email" type="email" placeholder="ornek@mail.com">
+      </div>
+      <div class="auth-field">
+        <label class="auth-label">Şifre</label>
+        <input class="auth-input" id="login-pass" type="password" placeholder="••••••••">
+      </div>
+      <button class="auth-btn" onclick="doLogin()">Giriş Yap</button>
+      <div class="auth-err" id="login-err"></div>
+    </div>
+
+    <div id="form-kayit" style="display:none">
+      <div class="auth-field">
+        <label class="auth-label">İsim</label>
+        <input class="auth-input" id="reg-name" type="text" placeholder="Adın Soyadın">
+      </div>
+      <div class="auth-field">
+        <label class="auth-label">E-posta</label>
+        <input class="auth-input" id="reg-email" type="email" placeholder="ornek@mail.com">
+      </div>
+      <div class="auth-field">
+        <label class="auth-label">Şifre</label>
+        <input class="auth-input" id="reg-pass" type="password" placeholder="En az 6 karakter">
+      </div>
+      <button class="auth-btn" onclick="doRegister()">Kayıt Ol</button>
+      <div class="auth-err" id="reg-err"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ANA UYGULAMA ══════════════ -->
+<div class="screen-wrap" id="app-wrap" style="display:none">
+
+  <!-- HOME -->
   <div class="screen active" id="screen-home">
-
     <div class="home-header">
       <span class="home-header-icon">📒</span>
       <div class="home-header-text">
         <h1>Alacak &amp; Verecek<br>Defteri</h1>
         <div class="sub" id="today-label">—</div>
       </div>
+      <button class="logout-btn" onclick="doLogout()">Çıkış</button>
     </div>
-
     <div class="summary-row">
       <div class="summary-card green" onclick="gotoFilter('alacak')">
         <div class="sc-top"><span class="sc-icon">💚</span><span class="sc-label">Alacaklarım</span></div>
@@ -414,22 +383,17 @@ body::before {
         <div class="sc-cta">Görüntüle ›</div>
       </div>
     </div>
-
     <div class="section-title">Takvim</div>
-
     <div class="year-row">
       <button class="year-btn" onclick="changeYear(-1)">‹</button>
       <div class="year-display" id="year-display">2025</div>
       <button class="year-btn" onclick="changeYear(1)">›</button>
     </div>
-
     <div class="month-grid" id="month-scroll"></div>
-
   </div>
 
-  <!-- ══════════════ SCREEN: CALENDAR ══════════════ -->
+  <!-- CALENDAR -->
   <div class="screen" id="screen-calendar">
-
     <div class="top-bar">
       <button class="back-btn" onclick="goBack()">←</button>
       <div>
@@ -437,16 +401,11 @@ body::before {
         <div class="top-bar-sub" id="cal-sub">—</div>
       </div>
     </div>
-
     <div class="cal-month-sum">
       <div class="cms-card green"><div class="cms-lbl">Alacak</div><div class="cms-val" id="cal-alacak">0₺</div></div>
       <div class="cms-card red"><div class="cms-lbl">Borç</div><div class="cms-val" id="cal-borc">0₺</div></div>
     </div>
-
-    <div class="cal-wrap">
-      <div class="cal-grid" id="cal-grid"></div>
-    </div>
-
+    <div class="cal-wrap"><div class="cal-grid" id="cal-grid"></div></div>
     <div class="day-recs-section" id="day-recs-section" style="display:none">
       <div class="day-recs-title-row">
         <div class="day-recs-date" id="day-recs-date">—</div>
@@ -454,54 +413,71 @@ body::before {
       </div>
       <div class="day-recs" id="day-recs-list"></div>
     </div>
-
   </div>
 
-  <!-- ══════════════ SCREEN: FILTER ══════════════ -->
+  <!-- FILTER -->
   <div class="screen" id="screen-filter">
-
     <div class="top-bar">
       <button class="back-btn" onclick="goBack()">←</button>
       <div class="top-bar-title" id="filter-title">—</div>
     </div>
-
     <div class="filter-badge" id="filter-badge">
       <div class="fb-lbl" id="filter-badge-lbl">—</div>
       <div class="fb-amt" id="filter-badge-amt">0₺</div>
     </div>
-
     <div class="filter-plist" id="filter-plist"></div>
-
   </div>
 
-  <!-- ══════════════ SCREEN: PERSON ══════════════ -->
+  <!-- PERSON -->
   <div class="screen" id="screen-person">
-
     <div class="top-bar">
       <button class="back-btn" onclick="goBack()">←</button>
       <div class="top-bar-title" id="p-name-bar">—</div>
     </div>
-
     <div class="person-hero">
       <div class="person-avatar-big" id="p-avatar-big"></div>
       <div class="pname" id="p-name">—</div>
       <div class="pbal" id="p-balance">0₺</div>
       <div class="pbal-lbl" id="p-balance-label"></div>
     </div>
-
     <div class="p-acts">
       <button class="p-abt g" onclick="quickAdd('verdim')">💚 Para Verdim</button>
       <button class="p-abt r" onclick="quickAdd('aldim')">❤️ Para Aldım</button>
     </div>
-
     <div class="section-title">Geçmiş</div>
     <div class="hist-list" id="history-list"></div>
-
   </div>
 
-</div><!-- /screen-wrap -->
+</div>
 
-<!-- ══════════════ FORM MODAL ══════════════ -->
+<!-- RECORD POPUP -->
+<div class="rec-popup-overlay" id="rec-popup-overlay" onclick="closeRecPopup(event)">
+  <div class="rec-popup">
+    <button class="rec-popup-close" onclick="closeRecPopupDirect()">✕</button>
+    <div class="rec-popup-color-bar" id="rp-bar"></div>
+    <div class="rec-popup-body">
+      <div class="rec-popup-type-badge" id="rp-badge"></div>
+      <div class="rec-popup-amount" id="rp-amount">—</div>
+      <div class="rec-popup-rows">
+        <div class="rec-popup-row">
+          <div class="rpr-icon">👤</div>
+          <div class="rpr-info"><div class="rpr-label">Kişi</div><div class="rpr-value" id="rp-name">—</div></div>
+        </div>
+        <div class="rec-popup-row">
+          <div class="rpr-icon">📅</div>
+          <div class="rpr-info"><div class="rpr-label">Tarih</div><div class="rpr-value" id="rp-date">—</div></div>
+        </div>
+        <div class="rec-popup-row" id="rp-note-row" style="display:none">
+          <div class="rpr-icon">📝</div>
+          <div class="rpr-info"><div class="rpr-label">Not</div><div class="rpr-value" id="rp-note">—</div></div>
+        </div>
+      </div>
+      <button class="rec-popup-paid-btn" onclick="markPaid()">✅ Borç Ödendi</button>
+    </div>
+  </div>
+</div>
+
+<!-- FORM MODAL -->
 <div class="modal-overlay" id="modal" onclick="closeModal(event)">
   <div class="modal-sheet">
     <div class="mh"></div>
@@ -534,73 +510,71 @@ body::before {
   </div>
 </div>
 
-<!-- ══════════════ RECORD DETAIL POPUP ══════════════ -->
-<div class="rec-popup-overlay" id="rec-popup-overlay" onclick="closeRecPopup(event)">
-  <div class="rec-popup">
-    <button class="rec-popup-close" onclick="closeRecPopupDirect()">✕</button>
-    <div class="rec-popup-color-bar" id="rp-bar"></div>
-    <div class="rec-popup-body">
-      <div class="rec-popup-type-badge" id="rp-badge"></div>
-      <div class="rec-popup-amount" id="rp-amount">—</div>
-      <div class="rec-popup-rows">
-        <div class="rec-popup-row">
-          <div class="rpr-icon">👤</div>
-          <div class="rpr-info">
-            <div class="rpr-label">Kişi</div>
-            <div class="rpr-value" id="rp-name">—</div>
-          </div>
-        </div>
-        <div class="rec-popup-row">
-          <div class="rpr-icon">📅</div>
-          <div class="rpr-info">
-            <div class="rpr-label">Tarih</div>
-            <div class="rpr-value" id="rp-date">—</div>
-          </div>
-        </div>
-        <div class="rec-popup-row" id="rp-note-row" style="display:none">
-          <div class="rpr-icon">📝</div>
-          <div class="rpr-info">
-            <div class="rpr-label">Not</div>
-            <div class="rpr-value" id="rp-note">—</div>
-          </div>
-        </div>
-      </div>
-      <button class="rec-popup-paid-btn" onclick="markPaid()">✅ Borç Ödendi</button>
-    </div>
-  </div>
-</div>
-
-<button class="fab" id="main-fab" onclick="openModal()">
+<button class="fab hidden" id="main-fab" onclick="openModal()">
   <span style="font-size:19px">➕</span> Yeni Kayıt Ekle
 </button>
-<div class="loading-overlay" id="loading-overlay">
-  <div class="loading-spinner"></div>
-</div>
+<div class="loading-overlay" id="loading-overlay"><div class="loading-spinner"></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── SUPABASE BAĞLANTISI ─────────────────────────────────────────
-const SUPABASE_URL  = 'https://bgyixqqhcakojfkpxiqn.supabase.co';
-const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJneWl4cXFoY2Frb2pma3B4aXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDQ5OTcsImV4cCI6MjA4OTc4MDk5N30.Bg7GhYCkkEJ7sY4w21btsXZSsBBMzxOud2EQqvj_rSw';
-const API = `${SUPABASE_URL}/rest/v1/records`;
-const HEADERS = {
-  'Content-Type': 'application/json',
-  'apikey': SUPABASE_KEY,
-  'Authorization': `Bearer ${SUPABASE_KEY}`
-};
+// ─── SUPABASE ─────────────────────────────────────────────────
+const SB_URL = 'https://bgyixqqhcakojfkpxiqn.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJneWl4cXFoY2Frb2pma3B4aXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDQ5OTcsImV4cCI6MjA4OTc4MDk5N30.Bg7GhYCkkEJ7sY4w21btsXZSsBBMzxOud2EQqvj_rSw';
+
+let authToken = null;
+
+function sbHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'apikey': SB_KEY,
+    'Authorization': `Bearer ${authToken || SB_KEY}`
+  };
+}
+
+async function sbSignUp(email, password) {
+  const r = await fetch(`${SB_URL}/auth/v1/signup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
+    body: JSON.stringify({ email, password })
+  });
+  return r.json();
+}
+
+async function sbSignIn(email, password) {
+  const r = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
+    body: JSON.stringify({ email, password })
+  });
+  return r.json();
+}
+
+async function sbSignOut() {
+  await fetch(`${SB_URL}/auth/v1/logout`, {
+    method: 'POST',
+    headers: sbHeaders()
+  });
+}
 
 async function dbGetAll() {
-  const r = await fetch(`${API}?order=date.desc`, { headers: HEADERS });
-  return r.ok ? await r.json() : [];
+  const r = await fetch(`${SB_URL}/rest/v1/records?order=date.desc`, { headers: sbHeaders() });
+  return r.ok ? r.json() : [];
 }
 async function dbInsert(rec) {
-  await fetch(API, { method:'POST', headers:{...HEADERS,'Prefer':'return=minimal'}, body: JSON.stringify(rec) });
+  await fetch(`${SB_URL}/rest/v1/records`, {
+    method: 'POST',
+    headers: { ...sbHeaders(), 'Prefer': 'return=minimal' },
+    body: JSON.stringify(rec)
+  });
 }
 async function dbDelete(id) {
-  await fetch(`${API}?id=eq.${id}`, { method:'DELETE', headers: HEADERS });
+  await fetch(`${SB_URL}/rest/v1/records?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: sbHeaders()
+  });
 }
 
-// ─── STATE ──────────────────────────────────────────────────────
+// ─── STATE ────────────────────────────────────────────────────
 let records = [];
 let selTypeVal = null;
 let calYear = new Date().getFullYear();
@@ -612,7 +586,6 @@ let navStack = ['screen-home'];
 const MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
 const DAYS   = ['Pt','Sa','Ça','Pe','Cu','Ct','Pz'];
 
-// ─── HELPERS ────────────────────────────────────────────────────
 const fmt    = n => Math.abs(n).toLocaleString('tr-TR') + '₺';
 const todayS = () => new Date().toISOString().slice(0,10);
 const trDate = d => new Date(d+'T00:00:00').toLocaleDateString('tr-TR',{day:'numeric',month:'long'});
@@ -631,69 +604,118 @@ function getPeople() {
   return m;
 }
 
-// ─── NAVIGATION ─────────────────────────────────────────────────
-function showScreen(id) {
-  const prev = navStack[navStack.length - 1];
-  if (prev === id) return;
-
-  // push
-  navStack.push(id);
-  _applyNav(prev, id);
+// ─── AUTH ─────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('tab-giris').classList.toggle('active', tab==='giris');
+  document.getElementById('tab-kayit').classList.toggle('active', tab==='kayit');
+  document.getElementById('form-giris').style.display = tab==='giris' ? 'block' : 'none';
+  document.getElementById('form-kayit').style.display = tab==='kayit' ? 'block' : 'none';
 }
 
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const err   = document.getElementById('login-err');
+  if (!email || !pass) { err.textContent = 'E-posta ve şifre gerekli.'; return; }
+  setLoading(true);
+  const data = await sbSignIn(email, pass);
+  setLoading(false);
+  if (data.error || !data.access_token) {
+    err.textContent = 'E-posta veya şifre hatalı.';
+    return;
+  }
+  authToken = data.access_token;
+  localStorage.setItem('sb_token', authToken);
+  enterApp();
+}
+
+async function doRegister() {
+  const name  = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass  = document.getElementById('reg-pass').value;
+  const err   = document.getElementById('reg-err');
+  if (!name || !email || !pass) { err.textContent = 'Tüm alanları doldur.'; return; }
+  if (pass.length < 6) { err.textContent = 'Şifre en az 6 karakter olmalı.'; return; }
+  setLoading(true);
+  const data = await sbSignUp(email, pass);
+  setLoading(false);
+  if (data.error) { err.textContent = 'Bu e-posta zaten kayıtlı olabilir.'; return; }
+  err.style.color = 'var(--green)';
+  err.textContent = '✅ Kayıt olundu! Giriş yapabilirsin.';
+  setTimeout(() => { err.style.color=''; err.textContent=''; switchTab('giris'); }, 2000);
+}
+
+async function doLogout() {
+  setLoading(true);
+  await sbSignOut();
+  setLoading(false);
+  authToken = null;
+  localStorage.removeItem('sb_token');
+  records = [];
+  document.getElementById('app-wrap').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('main-fab').classList.add('hidden');
+}
+
+async function enterApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-wrap').style.display = 'block';
+  document.getElementById('main-fab').classList.remove('hidden');
+  setLoading(true);
+  records = await dbGetAll();
+  setLoading(false);
+  calYear = new Date().getFullYear();
+  navStack = ['screen-home'];
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active','behind'));
+  document.getElementById('screen-home').classList.add('active');
+  renderHome();
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────
+function showScreen(id) {
+  const prev = navStack[navStack.length-1];
+  if (prev===id) return;
+  navStack.push(id);
+  _applyNav(prev, id, false);
+}
 function goBack() {
-  if (navStack.length <= 1) return;
+  if (navStack.length<=1) return;
   const current = navStack.pop();
-  const prev = navStack[navStack.length - 1];
+  const prev = navStack[navStack.length-1];
   _applyNav(current, prev, true);
 }
-
 function _applyNav(from, to, isBack) {
   const fromEl = document.getElementById(from);
   const toEl   = document.getElementById(to);
-
-  // remove stale classes
-  document.querySelectorAll('.screen').forEach(s => {
-    s.classList.remove('active','behind');
-  });
-
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active','behind'));
   if (isBack) {
-    // going back: "to" slides in from left (was behind), "from" slides out to right
     fromEl.classList.add('active');
     toEl.style.transition = 'none';
     toEl.style.transform = 'translateX(-28px)';
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        toEl.style.transition = '';
-        toEl.classList.add('active');
-        fromEl.classList.remove('active');
-        fromEl.style.transform = 'translateX(100%)';
-        setTimeout(()=>{ fromEl.style.transform=''; },350);
-      });
-    });
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      toEl.style.transition = '';
+      toEl.classList.add('active');
+      fromEl.classList.remove('active');
+      fromEl.style.transform = 'translateX(100%)';
+      setTimeout(()=>{ fromEl.style.transform=''; },350);
+    }));
   } else {
-    // going forward: "to" slides in from right
     toEl.style.transition = 'none';
     toEl.style.transform = 'translateX(100%)';
     fromEl.classList.add('behind');
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        toEl.style.transition = '';
-        toEl.classList.add('active');
-        toEl.style.transform = '';
-      });
-    });
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      toEl.style.transition = '';
+      toEl.classList.add('active');
+      toEl.style.transform = '';
+    }));
   }
-
-  // FAB only on home
-  document.getElementById('main-fab').classList.toggle('hidden', to !== 'screen-home');
+  document.getElementById('main-fab').classList.toggle('hidden', to!=='screen-home');
 }
 
-// ─── HOME ───────────────────────────────────────────────────────
+// ─── HOME ─────────────────────────────────────────────────────
 function renderHome() {
   document.getElementById('today-label').textContent =
     new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-
   const p = getPeople();
   let a=0,b=0;
   for (const v of Object.values(p)) { if(v>0) a+=v; else b+=Math.abs(v); }
@@ -703,13 +725,11 @@ function renderHome() {
   document.getElementById('year-display').textContent = calYear;
   renderMonthCards();
 }
-
 function changeYear(d) {
   calYear += d;
   document.getElementById('year-display').textContent = calYear;
   renderMonthCards();
 }
-
 function renderMonthCards() {
   const wrap = document.getElementById('month-scroll');
   wrap.innerHTML = MONTHS.map((name,i) => {
@@ -724,85 +744,60 @@ function renderMonthCards() {
   }).join('');
 }
 
-// ─── CALENDAR SCREEN ────────────────────────────────────────────
+// ─── CALENDAR ─────────────────────────────────────────────────
 function gotoCalendar(monthIdx) {
   calMonthIdx = monthIdx; selDay = null;
   renderCalendarScreen();
   showScreen('screen-calendar');
 }
-
 function renderCalendarScreen() {
-  const m = calMonthIdx;
+  const m  = calMonthIdx;
   const ms = String(m+1).padStart(2,'0');
-  const pref = `${calYear}-${ms}`;
-  const mr = records.filter(r=>r.date.startsWith(pref));
-
-  document.getElementById('cal-title').textContent = MONTHS[m] + ' ' + calYear;
-  document.getElementById('cal-sub').textContent =
-    mr.length ? `${mr.length} işlem` : 'Kayıt yok';
-
+  const mr = records.filter(r=>r.date.startsWith(`${calYear}-${ms}`));
+  document.getElementById('cal-title').textContent = MONTHS[m]+' '+calYear;
+  document.getElementById('cal-sub').textContent = mr.length ? `${mr.length} işlem` : 'Kayıt yok';
   const ma = mr.filter(r=>r.amount>0).reduce((s,r)=>s+r.amount,0);
   const mb = mr.filter(r=>r.amount<0).reduce((s,r)=>s+Math.abs(r.amount),0);
   document.getElementById('cal-alacak').textContent = fmt(ma);
   document.getElementById('cal-borc').textContent   = fmt(mb);
-
-  // build day map
   const dayMap = {};
   for (const r of mr) { const d=parseInt(r.date.slice(8,10)); (dayMap[d]=dayMap[d]||[]).push(r); }
-
-  let fd = new Date(calYear,m,1).getDay();
-  fd = (fd+6)%7; // Mon=0
+  let fd = new Date(calYear,m,1).getDay(); fd=(fd+6)%7;
   const dim = new Date(calYear,m+1,0).getDate();
   const td  = todayS();
-
   let html = `<div class="cal-head">${DAYS.map(d=>`<span>${d}</span>`).join('')}</div><div class="cal-body">`;
-  for (let e=0;e<fd;e++) html += `<div class="cal-day empty"><div class="cdn"></div></div>`;
-  for (let day=1;day<=dim;day++) {
-    const ds = `${calYear}-${ms}-${String(day).padStart(2,'0')}`;
-    const r  = dayMap[day]||[];
-    const hg = r.some(x=>x.amount>0), hr = r.some(x=>x.amount<0);
-    const isTd  = ds===td;
-    const isSel = selDay===day;
-    html += `<div class="cal-day${r.length?' clickable':''}${isTd?' is-today':''}${isSel?' is-sel':''}"
-      ${r.length?`onclick="selectDay(${day})"`:''}>
+  for(let e=0;e<fd;e++) html+=`<div class="cal-day empty"><div class="cdn"></div></div>`;
+  for(let day=1;day<=dim;day++){
+    const ds=`${calYear}-${ms}-${String(day).padStart(2,'0')}`;
+    const r=dayMap[day]||[];
+    const hg=r.some(x=>x.amount>0),hr=r.some(x=>x.amount<0);
+    const isTd=ds===td, isSel=selDay===day;
+    html+=`<div class="cal-day${r.length?' clickable':''}${isTd?' is-today':''}${isSel?' is-sel':''}" ${r.length?`onclick="selectDay(${day})"`:''}>
       <div class="cdn">${day}</div>
       <div class="cdd">${hg?'<span>🟢</span>':''}${hr?'<span>🔴</span>':''}</div>
     </div>`;
   }
-  html += '</div>';
-  document.getElementById('cal-grid').innerHTML = html;
-
-  // day records
-  if (selDay) renderDayRecs(selDay, ms);
-  else document.getElementById('day-recs-section').style.display = 'none';
+  html+='</div>';
+  document.getElementById('cal-grid').innerHTML=html;
+  if(selDay) renderDayRecs(selDay,ms);
+  else document.getElementById('day-recs-section').style.display='none';
 }
-
-function selectDay(day) {
-  selDay = selDay===day ? null : day;
-  const ms = String(calMonthIdx+1).padStart(2,'0');
+function selectDay(day){
+  selDay=selDay===day?null:day;
+  const ms=String(calMonthIdx+1).padStart(2,'0');
   renderCalendarScreen();
-  if (selDay) {
-    setTimeout(()=>{
-      const s = document.getElementById('day-recs-section');
-      if(s) s.scrollIntoView({behavior:'smooth',block:'nearest'});
-    },80);
-  }
+  if(selDay) setTimeout(()=>{ const s=document.getElementById('day-recs-section'); if(s) s.scrollIntoView({behavior:'smooth',block:'nearest'}); },80);
 }
-
-function closeDay() {
-  selDay = null;
-  renderCalendarScreen();
-}
-
-function renderDayRecs(day, ms) {
-  const ds = `${calYear}-${ms}-${String(day).padStart(2,'0')}`;
-  const r  = records.filter(x=>x.date===ds);
-  const sec = document.getElementById('day-recs-section');
-  if (!r.length) { sec.style.display='none'; return; }
-  document.getElementById('day-recs-date').textContent = trDate(ds) + ' · ' + calYear;
-  document.getElementById('day-recs-list').innerHTML = r.map(x=>{
-    const c = x.amount>0?'p':'n';
-    const l = x.amount>0?'Para Verdim':'Para Aldım';
+function closeDay(){ selDay=null; renderCalendarScreen(); }
+function renderDayRecs(day,ms){
+  const ds=`${calYear}-${ms}-${String(day).padStart(2,'0')}`;
+  const r=records.filter(x=>x.date===ds);
+  const sec=document.getElementById('day-recs-section');
+  if(!r.length){ sec.style.display='none'; return; }
+  document.getElementById('day-recs-date').textContent=trDate(ds)+' · '+calYear;
+  document.getElementById('day-recs-list').innerHTML=r.map(x=>{
+    const c=x.amount>0?'p':'n';
+    const l=x.amount>0?'Para Verdim':'Para Aldım';
     return `<div class="dr-item" style="cursor:pointer" onclick="openRecPopup('${x.id}')">
       <div class="dr-dot ${c}"></div>
       <div class="dr-info"><div class="dr-name">${x.name}</div><div class="dr-note">${l}${x.note?' · '+x.note:''}</div></div>
@@ -810,90 +805,27 @@ function renderDayRecs(day, ms) {
       <div style="color:var(--muted);font-size:16px;margin-left:4px">›</div>
     </div>`;
   }).join('');
-  sec.style.display = 'block';
+  sec.style.display='block';
 }
 
-// ─── RECORD POPUP ────────────────────────────────────────────────
-let activeRecId = null;
-
-function openRecPopup(id) {
-  const rec = records.find(r=>r.id===id);
-  if (!rec) return;
-  activeRecId = id;
-
-  const c   = rec.amount > 0 ? 'p' : 'n';
-  const lbl = rec.amount > 0 ? '💚 Para Verdim' : '❤️ Para Aldım';
-
-  document.getElementById('rp-bar').className    = 'rec-popup-color-bar ' + c;
-  const badge = document.getElementById('rp-badge');
-  badge.className = 'rec-popup-type-badge ' + c;
-  badge.textContent = lbl;
-
-  const amt = document.getElementById('rp-amount');
-  amt.className = 'rec-popup-amount ' + c;
-  amt.textContent = (rec.amount>0?'+':'') + fmt(rec.amount);
-
-  document.getElementById('rp-name').textContent = rec.name;
-  document.getElementById('rp-date').textContent =
-    new Date(rec.date+'T00:00:00').toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-
-  const noteRow = document.getElementById('rp-note-row');
-  if (rec.note) {
-    document.getElementById('rp-note').textContent = rec.note;
-    noteRow.style.display = 'flex';
-  } else {
-    noteRow.style.display = 'none';
-  }
-
-  document.getElementById('rec-popup-overlay').classList.add('open');
-}
-
-function closeRecPopup(e) {
-  if (e.target === document.getElementById('rec-popup-overlay')) closeRecPopupDirect();
-}
-function closeRecPopupDirect() {
-  document.getElementById('rec-popup-overlay').classList.remove('open');
-  activeRecId = null;
-}
-
-async function markPaid() {
-  if (!activeRecId) return;
-  const rec = records.find(r=>r.id===activeRecId);
-  if (!rec) return;
-  const confirmed = confirm(`Bu borç ödendi mi?\n\n${rec.name} · ${fmt(rec.amount)}`);
-  if (!confirmed) return;
-  closeRecPopupDirect();
-  setLoading(true);
-  await dbDelete(activeRecId);
-  records = await dbGetAll();
-  setLoading(false);
-  activeRecId = null;
-  toast('✅ Borç silindi!');
-  renderCalendarScreen();
-  renderHome();
-}
-
-// ─── FILTER SCREEN ──────────────────────────────────────────────
-function gotoFilter(mode) {
-  const p = getPeople();
-  const isA = mode==='alacak';
-  const entries = Object.entries(p).filter(([,v])=>isA?v>0:v<0).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
-  const total   = entries.reduce((s,[,v])=>s+Math.abs(v),0);
-
-  document.getElementById('filter-title').textContent = isA ? 'Alacaklarım' : 'Borçlarım';
-  const badge = document.getElementById('filter-badge');
-  badge.className = 'filter-badge '+(isA?'g':'r');
-  document.getElementById('filter-badge-lbl').textContent = isA ? 'Toplam Alacak' : 'Toplam Borç';
-  document.getElementById('filter-badge-amt').textContent = fmt(total);
-
-  const list = document.getElementById('filter-plist');
-  if (!entries.length) {
-    list.innerHTML = `<div class="empty-st"><span class="ei">🎉</span>Kayıt yok!</div>`;
-  } else {
-    list.innerHTML = entries.map(([name,bal])=>{
-      const c   = bal>=0?'p':'n';
-      const tc  = records.filter(r=>r.name===name).length;
-      const sub = bal>0?'sana borçlu':'sen borçlusun';
+// ─── FILTER ───────────────────────────────────────────────────
+function gotoFilter(mode){
+  const p=getPeople();
+  const isA=mode==='alacak';
+  const entries=Object.entries(p).filter(([,v])=>isA?v>0:v<0).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
+  const total=entries.reduce((s,[,v])=>s+Math.abs(v),0);
+  document.getElementById('filter-title').textContent=isA?'Alacaklarım':'Borçlarım';
+  const badge=document.getElementById('filter-badge');
+  badge.className='filter-badge '+(isA?'g':'r');
+  document.getElementById('filter-badge-lbl').textContent=isA?'Toplam Alacak':'Toplam Borç';
+  document.getElementById('filter-badge-amt').textContent=fmt(total);
+  const list=document.getElementById('filter-plist');
+  if(!entries.length){ list.innerHTML=`<div class="empty-st"><span class="ei">🎉</span>Kayıt yok!</div>`; }
+  else {
+    list.innerHTML=entries.map(([name,bal])=>{
+      const c=bal>=0?'p':'n';
+      const tc=records.filter(r=>r.name===name).length;
+      const sub=bal>0?'sana borçlu':'sen borçlusun';
       return `<div class="fp-item ${c}" onclick="gotoPerson('${name.replace(/'/g,"\\'")}')">
         <div class="fp-av">${name.slice(0,2).toUpperCase()}</div>
         <div class="fp-inf"><div class="fp-name">${name}</div><div class="fp-sub">${tc} işlem · ${sub}</div></div>
@@ -905,117 +837,150 @@ function gotoFilter(mode) {
   showScreen('screen-filter');
 }
 
-// ─── PERSON SCREEN ──────────────────────────────────────────────
-function gotoPerson(name) {
-  currentPerson = name;
-  renderPersonScreen(name);
-  showScreen('screen-person');
+// ─── PERSON ───────────────────────────────────────────────────
+function gotoPerson(name){ currentPerson=name; renderPersonScreen(name); showScreen('screen-person'); }
+function renderPersonScreen(name){
+  const r=records.filter(x=>x.name===name).sort((a,b)=>b.date.localeCompare(a.date));
+  const bal=r.reduce((s,x)=>s+x.amount,0);
+  document.getElementById('p-name-bar').textContent=name;
+  document.getElementById('p-name').textContent=name;
+  const av=document.getElementById('p-avatar-big');
+  av.textContent=name.slice(0,2).toUpperCase();
+  av.style.background=bal>=0?'var(--green-light)':'var(--red-light)';
+  av.style.color=bal>=0?'var(--green)':'var(--red)';
+  const be=document.getElementById('p-balance');
+  be.textContent=(bal>=0?'+':'')+fmt(bal);
+  be.className='pbal '+(bal>=0?'pos':'neg');
+  const lbl=document.getElementById('p-balance-label');
+  if(bal>0) lbl.textContent=`${name} sana borçlu`;
+  else if(bal<0) lbl.textContent=`Sen ${name}'e borçlusun`;
+  else lbl.textContent='Hesap kapalı 🎉';
+  const hl=document.getElementById('history-list');
+  if(!r.length){ hl.innerHTML=`<div class="empty-st"><span class="ei">🗂️</span>Kayıt yok</div>`; return; }
+  hl.innerHTML=r.map(x=>{
+    const c=x.amount>0?'p':'n';
+    const l=x.amount>0?'Para Verdim':'Para Aldım';
+    return `<div class="hi">
+      <div class="hdot ${c}"></div>
+      <div class="hinf"><div class="hdesc">${l}${x.note?' · '+x.note:''}</div><div class="hdate">${trDate(x.date)}</div></div>
+      <div class="hamt ${c}">${x.amount>0?'+':''}${fmt(x.amount)}</div>
+      <button class="hdel" onclick="delRec('${x.id}','${name.replace(/'/g,"\\'")}')">🗑️</button>
+    </div>`;
+  }).join('');
+}
+function quickAdd(type){ openModal(currentPerson); setTimeout(()=>selType(type),55); }
+
+// ─── RECORD POPUP ─────────────────────────────────────────────
+let activeRecId=null;
+function openRecPopup(id){
+  const rec=records.find(r=>r.id===id); if(!rec) return;
+  activeRecId=id;
+  const c=rec.amount>0?'p':'n';
+  document.getElementById('rp-bar').className='rec-popup-color-bar '+c;
+  const badge=document.getElementById('rp-badge');
+  badge.className='rec-popup-type-badge '+c;
+  badge.textContent=rec.amount>0?'💚 Para Verdim':'❤️ Para Aldım';
+  const amt=document.getElementById('rp-amount');
+  amt.className='rec-popup-amount '+c;
+  amt.textContent=(rec.amount>0?'+':'')+fmt(rec.amount);
+  document.getElementById('rp-name').textContent=rec.name;
+  document.getElementById('rp-date').textContent=new Date(rec.date+'T00:00:00').toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const nr=document.getElementById('rp-note-row');
+  if(rec.note){ document.getElementById('rp-note').textContent=rec.note; nr.style.display='flex'; } else { nr.style.display='none'; }
+  document.getElementById('rec-popup-overlay').classList.add('open');
+}
+function closeRecPopup(e){ if(e.target===document.getElementById('rec-popup-overlay')) closeRecPopupDirect(); }
+function closeRecPopupDirect(){ document.getElementById('rec-popup-overlay').classList.remove('open'); activeRecId=null; }
+async function markPaid(){
+  if(!activeRecId) return;
+  const rec=records.find(r=>r.id===activeRecId); if(!rec) return;
+  if(!confirm(`Bu borç ödendi mi?\n\n${rec.name} · ${fmt(rec.amount)}`)) return;
+  closeRecPopupDirect();
+  setLoading(true);
+  await dbDelete(activeRecId);
+  records=await dbGetAll();
+  setLoading(false);
+  activeRecId=null;
+  toast('✅ Borç silindi!');
+  renderCalendarScreen(); renderHome();
 }
 
-function renderPersonScreen(name) {
-  const r   = records.filter(x=>x.name===name).sort((a,b)=>b.date.localeCompare(a.date));
-  const bal = r.reduce((s,x)=>s+x.amount,0);
-
-  document.getElementById('p-name-bar').textContent = name;
-  document.getElementById('p-name').textContent     = name;
-
-  const av = document.getElementById('p-avatar-big');
-  av.textContent = name.slice(0,2).toUpperCase();
-  av.style.background = bal>=0 ? 'var(--green-light)' : 'var(--red-light)';
-  av.style.color      = bal>=0 ? 'var(--green)' : 'var(--red)';
-
-  const be = document.getElementById('p-balance');
-  be.textContent = (bal>=0?'+':'')+fmt(bal);
-  be.className   = 'pbal '+(bal>=0?'pos':'neg');
-
-  const lbl = document.getElementById('p-balance-label');
-  if(bal>0)       lbl.textContent = `${name} sana borçlu`;
-  else if(bal<0)  lbl.textContent = `Sen ${name}'e borçlusun`;
-  else            lbl.textContent = 'Hesap kapalı 🎉';
-
-  const hl = document.getElementById('history-list');
-  if (!r.length) {
-    hl.innerHTML = `<div class="empty-st"><span class="ei">🗂️</span>Kayıt yok</div>`;
-  } else {
-    hl.innerHTML = r.map(x=>{
-      const c = x.amount>0?'p':'n';
-      const l = x.amount>0?'Para Verdim':'Para Aldım';
-      return `<div class="hi">
-        <div class="hdot ${c}"></div>
-        <div class="hinf"><div class="hdesc">${l}${x.note?' · '+x.note:''}</div><div class="hdate">${trDate(x.date)}</div></div>
-        <div class="hamt ${c}">${x.amount>0?'+':''}${fmt(x.amount)}</div>
-        <button class="hdel" onclick="delRec('${x.id}','${name.replace(/'/g,"\\'")}')">🗑️</button>
-      </div>`;
-    }).join('');
-  }
-}
-
-function quickAdd(type) { openModal(currentPerson); setTimeout(()=>selType(type),55); }
-
-// ─── FORM ───────────────────────────────────────────────────────
-function openModal(pre) {
-  selTypeVal = null;
-  document.getElementById('f-name').value   = pre||'';
-  document.getElementById('f-amount').value = '';
-  document.getElementById('f-note').value   = '';
-  document.getElementById('f-date').value   = todayS();
-  document.getElementById('btn-v').className = 'type-btn';
-  document.getElementById('btn-a').className = 'type-btn';
+// ─── FORM ─────────────────────────────────────────────────────
+function openModal(pre){
+  selTypeVal=null;
+  document.getElementById('f-name').value=pre||'';
+  document.getElementById('f-amount').value='';
+  document.getElementById('f-note').value='';
+  document.getElementById('f-date').value=todayS();
+  document.getElementById('btn-v').className='type-btn';
+  document.getElementById('btn-a').className='type-btn';
   document.getElementById('modal').classList.add('open');
   setTimeout(()=>document.getElementById('f-name').focus(),340);
 }
-function closeModal(e) {
-  if(e.target===document.getElementById('modal')) document.getElementById('modal').classList.remove('open');
+function closeModal(e){ if(e.target===document.getElementById('modal')) document.getElementById('modal').classList.remove('open'); }
+function selType(t){
+  selTypeVal=t;
+  document.getElementById('btn-v').className='type-btn'+(t==='verdim'?' sg':'');
+  document.getElementById('btn-a').className='type-btn'+(t==='aldim'?' sr':'');
 }
-function selType(t) {
-  selTypeVal = t;
-  document.getElementById('btn-v').className = 'type-btn'+(t==='verdim'?' sg':'');
-  document.getElementById('btn-a').className = 'type-btn'+(t==='aldim'?' sr':'');
-}
-
-async function saveRecord() {
-  const name   = document.getElementById('f-name').value.trim();
-  const amount = parseFloat(document.getElementById('f-amount').value);
-  const date   = document.getElementById('f-date').value;
-  const note   = document.getElementById('f-note').value.trim();
-  if(!name)             { toast('⚠️ İsim gerekli!'); return; }
-  if(!selTypeVal)       { toast('⚠️ Para verdin mi, aldın mı?'); return; }
+async function saveRecord(){
+  const name=document.getElementById('f-name').value.trim();
+  const amount=parseFloat(document.getElementById('f-amount').value);
+  const date=document.getElementById('f-date').value;
+  const note=document.getElementById('f-note').value.trim();
+  if(!name){ toast('⚠️ İsim gerekli!'); return; }
+  if(!selTypeVal){ toast('⚠️ Para verdin mi, aldın mı?'); return; }
   if(!amount||amount<=0){ toast('⚠️ Tutar gerekli!'); return; }
-  const amt = selTypeVal==='verdim' ? amount : -amount;
-  const rec = { id: Date.now().toString(), name, amount: amt, date: date||todayS(), note };
+  const amt=selTypeVal==='verdim'?amount:-amount;
+
+  // user_id'yi token'dan al
+  const payload = JSON.parse(atob(authToken.split('.')[1]));
+  const rec={ id:Date.now().toString(), user_id:payload.sub, name, amount:amt, date:date||todayS(), note };
+
   document.getElementById('modal').classList.remove('open');
   setLoading(true);
   await dbInsert(rec);
-  records = await dbGetAll();
+  records=await dbGetAll();
   setLoading(false);
   toast('✅ Kaydedildi!');
   renderHome();
-  const cur = navStack[navStack.length-1];
-  if (cur==='screen-person' && currentPerson===name) renderPersonScreen(name);
-  else if (cur==='screen-calendar') renderCalendarScreen();
+  const cur=navStack[navStack.length-1];
+  if(cur==='screen-person'&&currentPerson===name) renderPersonScreen(name);
+  else if(cur==='screen-calendar') renderCalendarScreen();
 }
-
-async function delRec(id, personName) {
+async function delRec(id,personName){
   if(!confirm('Bu kaydı silmek istediğine emin misin?')) return;
   setLoading(true);
   await dbDelete(id);
-  records = await dbGetAll();
+  records=await dbGetAll();
   setLoading(false);
   toast('🗑️ Silindi');
   renderHome();
-  if (records.filter(r=>r.name===personName).length===0) goBack();
+  if(records.filter(r=>r.name===personName).length===0) goBack();
   else renderPersonScreen(personName);
 }
 
-// ─── INIT ───────────────────────────────────────────────────────
-async function init() {
-  setLoading(true);
-  records = await dbGetAll();
-  setLoading(false);
-  calYear = new Date().getFullYear();
-  renderHome();
-}
-init();
+// ─── INIT ─────────────────────────────────────────────────────
+(async function(){
+  const saved = localStorage.getItem('sb_token');
+  if(saved){
+    // Token geçerli mi kontrol et
+    setLoading(true);
+    const r = await fetch(`${SB_URL}/auth/v1/user`, {
+      headers:{ 'apikey':SB_KEY, 'Authorization':`Bearer ${saved}` }
+    });
+    setLoading(false);
+    if(r.ok){
+      authToken = saved;
+      enterApp();
+      return;
+    } else {
+      localStorage.removeItem('sb_token');
+    }
+  }
+  // Token yoksa giriş ekranı göster
+  document.getElementById('auth-screen').style.display='flex';
+})();
 </script>
 </body>
 </html>
