@@ -365,6 +365,21 @@ body::before {
 }
 .rec-popup-paid-btn:active { background: #ddd8cf; }
 
+/* ── LOADING ── */
+.loading-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(245,240,232,0.85);
+  display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(2px);
+}
+.loading-spinner {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 4px solid var(--border);
+  border-top-color: var(--text);
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* ── TOAST ── */
 .toast { position:fixed; bottom:106px; left:50%; transform:translateX(-50%); background:var(--text); color:white; padding:10px 20px; border-radius:50px; font-size:13px; font-weight:700; z-index:400; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-events:none; }
 .toast.show { opacity:1; }
@@ -558,18 +573,40 @@ body::before {
 <button class="fab" id="main-fab" onclick="openModal()">
   <span style="font-size:19px">➕</span> Yeni Kayıt Ekle
 </button>
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-spinner"></div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
+// ─── SUPABASE BAĞLANTISI ─────────────────────────────────────────
+const SUPABASE_URL  = 'https://bgyixqqhcakojfkpxiqn.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJneWl4cXFoY2Frb2pma3B4aXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDQ5OTcsImV4cCI6MjA4OTc4MDk5N30.Bg7GhYCkkEJ7sY4w21btsXZSsBBMzxOud2EQqvj_rSw';
+const API = `${SUPABASE_URL}/rest/v1/records`;
+const HEADERS = {
+  'Content-Type': 'application/json',
+  'apikey': SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`
+};
+
+async function dbGetAll() {
+  const r = await fetch(`${API}?order=date.desc`, { headers: HEADERS });
+  return r.ok ? await r.json() : [];
+}
+async function dbInsert(rec) {
+  await fetch(API, { method:'POST', headers:{...HEADERS,'Prefer':'return=minimal'}, body: JSON.stringify(rec) });
+}
+async function dbDelete(id) {
+  await fetch(`${API}?id=eq.${id}`, { method:'DELETE', headers: HEADERS });
+}
+
 // ─── STATE ──────────────────────────────────────────────────────
-let records = JSON.parse(localStorage.getItem('defter_records') || '[]');
+let records = [];
 let selTypeVal = null;
 let calYear = new Date().getFullYear();
-let calMonthIdx = null; // which month is open in calendar screen
+let calMonthIdx = null;
 let selDay = null;
 let currentPerson = null;
-
-// Navigation stack: array of screen IDs
 let navStack = ['screen-home'];
 
 const MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
@@ -579,11 +616,14 @@ const DAYS   = ['Pt','Sa','Ça','Pe','Cu','Ct','Pz'];
 const fmt    = n => Math.abs(n).toLocaleString('tr-TR') + '₺';
 const todayS = () => new Date().toISOString().slice(0,10);
 const trDate = d => new Date(d+'T00:00:00').toLocaleDateString('tr-TR',{day:'numeric',month:'long'});
-function save() { localStorage.setItem('defter_records', JSON.stringify(records)); }
+
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 2200);
+}
+function setLoading(on) {
+  document.getElementById('loading-overlay').style.display = on ? 'flex' : 'none';
 }
 function getPeople() {
   const m = {};
@@ -816,17 +856,19 @@ function closeRecPopupDirect() {
   activeRecId = null;
 }
 
-function markPaid() {
+async function markPaid() {
   if (!activeRecId) return;
   const rec = records.find(r=>r.id===activeRecId);
   if (!rec) return;
   const confirmed = confirm(`Bu borç ödendi mi?\n\n${rec.name} · ${fmt(rec.amount)}`);
   if (!confirmed) return;
-  records = records.filter(r=>r.id!==activeRecId);
-  save();
   closeRecPopupDirect();
+  setLoading(true);
+  await dbDelete(activeRecId);
+  records = await dbGetAll();
+  setLoading(false);
+  activeRecId = null;
   toast('✅ Borç silindi!');
-  // refresh calendar
   renderCalendarScreen();
   renderHome();
 }
@@ -930,39 +972,50 @@ function selType(t) {
   document.getElementById('btn-v').className = 'type-btn'+(t==='verdim'?' sg':'');
   document.getElementById('btn-a').className = 'type-btn'+(t==='aldim'?' sr':'');
 }
-function saveRecord() {
+
+async function saveRecord() {
   const name   = document.getElementById('f-name').value.trim();
   const amount = parseFloat(document.getElementById('f-amount').value);
   const date   = document.getElementById('f-date').value;
   const note   = document.getElementById('f-note').value.trim();
-  if(!name)          { toast('⚠️ İsim gerekli!'); return; }
-  if(!selTypeVal)    { toast('⚠️ Para verdin mi, aldın mı?'); return; }
+  if(!name)             { toast('⚠️ İsim gerekli!'); return; }
+  if(!selTypeVal)       { toast('⚠️ Para verdin mi, aldın mı?'); return; }
   if(!amount||amount<=0){ toast('⚠️ Tutar gerekli!'); return; }
   const amt = selTypeVal==='verdim' ? amount : -amount;
-  records.push({id:Date.now().toString(), name, amount:amt, date:date||todayS(), note});
-  save();
+  const rec = { id: Date.now().toString(), name, amount: amt, date: date||todayS(), note };
   document.getElementById('modal').classList.remove('open');
+  setLoading(true);
+  await dbInsert(rec);
+  records = await dbGetAll();
+  setLoading(false);
   toast('✅ Kaydedildi!');
-
-  // refresh relevant screen
+  renderHome();
   const cur = navStack[navStack.length-1];
-  if (cur==='screen-home')     { renderHome(); }
-  else if(cur==='screen-person' && currentPerson===name) { renderPersonScreen(name); }
-  else if(cur==='screen-calendar') { renderCalendarScreen(); }
-  renderHome(); // always keep home fresh for totals
+  if (cur==='screen-person' && currentPerson===name) renderPersonScreen(name);
+  else if (cur==='screen-calendar') renderCalendarScreen();
 }
 
-function delRec(id, personName) {
+async function delRec(id, personName) {
   if(!confirm('Bu kaydı silmek istediğine emin misin?')) return;
-  records = records.filter(r=>r.id!==id); save(); toast('🗑️ Silindi');
-  if (records.filter(r=>r.name===personName).length===0) { goBack(); }
-  else { renderPersonScreen(personName); }
+  setLoading(true);
+  await dbDelete(id);
+  records = await dbGetAll();
+  setLoading(false);
+  toast('🗑️ Silindi');
   renderHome();
+  if (records.filter(r=>r.name===personName).length===0) goBack();
+  else renderPersonScreen(personName);
 }
 
 // ─── INIT ───────────────────────────────────────────────────────
-calYear = new Date().getFullYear();
-renderHome();
+async function init() {
+  setLoading(true);
+  records = await dbGetAll();
+  setLoading(false);
+  calYear = new Date().getFullYear();
+  renderHome();
+}
+init();
 </script>
 </body>
 </html>
