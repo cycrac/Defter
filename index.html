@@ -100,10 +100,10 @@ body::before {
   will-change: transform;
 }
 .screen.active { transform: translateX(0); z-index: 2; }
-.screen.behind { transform: translateX(-28px); z-index: 1; }
+.screen.behind { z-index: 1; }
 .screen#screen-home { transform: translateX(0); z-index: 1; }
 .screen#screen-home.active { z-index: 2; }
-.screen#screen-home.behind { transform: translateX(-28px); }
+.screen#screen-home.behind { z-index: 1; }
 .screen::before {
   content: '';
   position: fixed; inset: 0;
@@ -695,28 +695,52 @@ function goBack() {
 function _applyNav(from, to, isBack) {
   const fromEl = document.getElementById(from);
   const toEl   = document.getElementById(to);
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active','behind'));
+
+  // Önce tüm inline style ve class temizle
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active','behind');
+    s.style.transition = '';
+    s.style.transform = '';
+  });
+
   if (isBack) {
-    fromEl.classList.add('active');
+    // Geri: mevcut ekran sağa kayar, önceki ekran soldan gelir
+    fromEl.style.transition = 'none';
+    fromEl.style.transform = 'translateX(0)';
     toEl.style.transition = 'none';
-    toEl.style.transform = 'translateX(-28px)';
+    toEl.style.transform = 'translateX(0)';
+    fromEl.classList.add('active');
+
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      toEl.style.transition = '';
-      toEl.classList.add('active');
-      fromEl.classList.remove('active');
+      fromEl.style.transition = 'transform 0.32s cubic-bezier(0.4,0,0.2,1)';
+      toEl.style.transition   = 'transform 0.32s cubic-bezier(0.4,0,0.2,1)';
       fromEl.style.transform = 'translateX(100%)';
-      setTimeout(()=>{ fromEl.style.transform=''; },350);
+      toEl.style.transform   = 'translateX(0)';
+      toEl.classList.add('active');
+      setTimeout(()=>{
+        fromEl.classList.remove('active');
+        fromEl.style.transition = '';
+        fromEl.style.transform = '';
+        toEl.style.transition = '';
+      }, 340);
     }));
   } else {
+    // İleri: yeni ekran sağdan gelir
     toEl.style.transition = 'none';
     toEl.style.transform = 'translateX(100%)';
-    fromEl.classList.add('behind');
+
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      toEl.style.transition = '';
+      toEl.style.transition = 'transform 0.32s cubic-bezier(0.4,0,0.2,1)';
+      toEl.style.transform  = 'translateX(0)';
       toEl.classList.add('active');
-      toEl.style.transform = '';
+      fromEl.classList.add('active'); // arkada görünsün
+      setTimeout(()=>{
+        fromEl.classList.remove('active');
+        toEl.style.transition = '';
+      }, 340);
     }));
   }
+
   document.getElementById('main-fab').classList.toggle('hidden', to!=='screen-home');
 }
 
@@ -904,14 +928,17 @@ async function markPaid(){
   if(!activeRecId) return;
   const rec=records.find(r=>r.id===activeRecId); if(!rec) return;
   if(!confirm(`Bu borç ödendi mi?\n\n${rec.name} · ${fmt(rec.amount)}`)) return;
+  const deletedId = activeRecId;
   closeRecPopupDirect();
   setLoading(true);
-  await dbDelete(activeRecId);
-  records=await dbGetAll();
+  await dbDelete(deletedId);
+  records = await dbGetAll();
   setLoading(false);
-  activeRecId=null;
   toast('✅ Borç silindi!');
-  renderCalendarScreen(); renderHome();
+  // Takvim ekranını yenile (selDay sıfırla ki silinen kayıt görünmesin)
+  selDay = null;
+  if(calMonthIdx !== null) renderCalendarScreen();
+  renderHome();
 }
 
 // ─── FORM ─────────────────────────────────────────────────────
